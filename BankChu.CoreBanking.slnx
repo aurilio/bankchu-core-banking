@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BankChu.CoreBanking.Api/BankChu.CoreBanking.Api.csproj" />
+    <Project Path="src/BankChu.CoreBanking.Application/BankChu.CoreBanking.Application.csproj" Id="2b46fa54-cfb4-4fa6-8edf-3c63e416d055" />
+    <Project Path="src/BankChu.CoreBanking.Domain/BankChu.CoreBanking.Domain.csproj" Id="714032c6-b35d-4151-a979-71b0bae6f0f5" />
+    <Project Path="src/BankChu.CoreBanking.Infrastructure/BankChu.CoreBanking.Infrastructure.csproj" Id="795cf738-2a4d-4067-8627-1459f309cf69" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BankChu.CoreBanking.Application.Tests/BankChu.CoreBanking.Application.Tests.csproj" Id="b56f1afd-d3d1-469c-83f7-b70c3748eef1" />
+    <Project Path="tests/BankChu.CoreBanking.Domain.Tests/BankChu.CoreBanking.Domain.Tests.csproj" Id="b287032c-2278-4a70-9f16-4098f09b4356" />
+  </Folder>
+</Solution>

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="BankChu.CoreBanking.Api/BankChu.CoreBanking.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
