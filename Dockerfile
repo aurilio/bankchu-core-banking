@@ -2,26 +2,23 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-COPY BankChu.CoreBanking.sln .
-COPY src/BankChu.CoreBanking.Api/BankChu.CoreBanking.Api.csproj src/BankChu.CoreBanking.Api/
-COPY src/BankChu.CoreBanking.Application/BankChu.CoreBanking.Application.csproj src/BankChu.CoreBanking.Application/
-COPY src/BankChu.CoreBanking.Domain/BankChu.CoreBanking.Domain.csproj src/BankChu.CoreBanking.Domain/
-COPY src/BankChu.CoreBanking.Infrastructure/BankChu.CoreBanking.Infrastructure.csproj src/BankChu.CoreBanking.Infrastructure/
-
-RUN dotnet restore
-
+# Copia apenas os projetos (não a solution)
 COPY src/ src/
+
+# Restore baseado no projeto da API
+RUN dotnet restore src/BankChu.CoreBanking.Api/BankChu.CoreBanking.Api.csproj
+
+# Publish
 RUN dotnet publish src/BankChu.CoreBanking.Api/BankChu.CoreBanking.Api.csproj \
     -c Release \
     -o /app/publish \
     --no-restore
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 
 EXPOSE 8080
 
 COPY --from=build /app/publish .
-
 ENTRYPOINT ["dotnet", "BankChu.CoreBanking.Api.dll"]
