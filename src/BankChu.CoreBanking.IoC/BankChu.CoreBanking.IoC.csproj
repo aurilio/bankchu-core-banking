@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BankChu.CoreBanking.Domain\BankChu.CoreBanking.Domain.csproj" />
+    <ProjectReference Include="..\BankChu.CoreBanking.Application\BankChu.CoreBanking.Application.csproj" />
+    <ProjectReference Include="..\BankChu.CoreBanking.Infrastructure\BankChu.CoreBanking.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
