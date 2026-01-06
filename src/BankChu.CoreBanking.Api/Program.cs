@@ -1,11 +1,13 @@
+using BankChu.CoreBanking.IoC;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Health checks (infra baseline)
 builder.Services.AddHealthChecks();
+
+builder.Services.AddCoreBanking(builder.Configuration);
 
 var app = builder.Build();
 
