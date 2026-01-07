@@ -1,4 +1,8 @@
-﻿using BankChu.CoreBanking.Infrastructure.Persistence;
+﻿using BankChu.CoreBanking.Application.Abstractions.Persistence;
+using BankChu.CoreBanking.Application.Accounts.Create;
+using BankChu.CoreBanking.Infrastructure.Persistence;
+using BankChu.CoreBanking.Infrastructure.Persistence.Repositories;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +13,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCoreBanking(
         this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        AddDatabase(services, configuration);
+        AddRepositories(services);
+        AddUnitOfWork(services);
+        AddApplicationServices(services);
+        AddValidators(services);
+
+        return services;
+    }
+
+    private static void AddDatabase(
+        IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddDbContext<CoreBankingDbContext>(options =>
@@ -23,9 +40,26 @@ public static class DependencyInjection
                         maxRetryDelay: TimeSpan.FromSeconds(10),
                         errorNumbersToAdd: null);
                 });
-
         });
+    }
 
-        return services;
+    private static void AddRepositories(IServiceCollection services)
+    {
+        services.AddScoped<IAccountRepository, AccountRepository>();
+    }
+
+    private static void AddUnitOfWork(IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+
+    private static void AddApplicationServices(IServiceCollection services)
+    {
+        services.AddScoped<CreateAccountService>();
+    }
+
+    private static void AddValidators(IServiceCollection services)
+    {
+        services.AddValidatorsFromAssembly(typeof(CreateAccountValidator).Assembly);
     }
 }
