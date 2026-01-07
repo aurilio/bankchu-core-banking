@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankChu.CoreBanking.Application\BankChu.CoreBanking.Application.csproj" />
     <ProjectReference Include="..\BankChu.CoreBanking.IoC\BankChu.CoreBanking.IoC.csproj" />
   </ItemGroup>
 
