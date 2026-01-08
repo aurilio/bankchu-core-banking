@@ -1,3 +1,4 @@
+using BankChu.CoreBanking.Api.Auth;
 using BankChu.CoreBanking.Api.Endpoints;
 using BankChu.CoreBanking.Api.Endpoints.Accounts;
 using BankChu.CoreBanking.Api.Extensions;
@@ -10,17 +11,22 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddHealthChecks();
-
+// Core (Domain + Application + Infra)
 builder.Services.AddCoreBanking(builder.Configuration);
+
+// API concerns
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorizationPolicies();
+builder.Services.AddSwaggerWithAuth();
+
+// API-only handlers
 builder.Services.AddScoped<StatementQueryHandler>();
+
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
 app.UseGlobalExceptionHandler();
-
 app.ApplyMigrations();
 
 if (app.Environment.IsDevelopment())
@@ -30,6 +36,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHealthChecks("/health");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapApiEndpoints();
 
