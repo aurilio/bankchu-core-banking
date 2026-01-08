@@ -7,9 +7,13 @@ public static class GetAccountStatementEndpoint
     public static void MapGetStatement(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet("/api/v1/accounts/{accountId:guid}/statements", GetStatementsAsync)
+            .RequireAuthorization("StatementsRead")
             .WithTags("Accounts")
             .Produces<GetStatementResponse>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status304NotModified)
             .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
