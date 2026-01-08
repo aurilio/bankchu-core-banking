@@ -1,4 +1,6 @@
-﻿namespace BankChu.CoreBanking.Domain.Entities;
+﻿using BankChu.CoreBanking.Domain.Enums;
+
+namespace BankChu.CoreBanking.Domain.Entities;
 
 public class Transfer
 {
@@ -12,7 +14,7 @@ public class Transfer
 
     public DateTime CreatedAt { get; private set; }
 
-    public string Status { get; private set; } = null!;
+    public TransferStatus Status { get; private set; }
 
     public string? Reason { get; private set; }
 
@@ -28,12 +30,15 @@ public class Transfer
         ToAccountId = toAccountId;
         Amount = amount;
         CreatedAt = DateTime.UtcNow;
-        Status = "Completed";
+        Status = TransferStatus.Completed;
     }
 
     public void Reject(string reason)
     {
-        Status = "Rejected";
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Rejection reason must be provided");
+
+        Status = TransferStatus.Rejected;
         Reason = reason;
     }
 }

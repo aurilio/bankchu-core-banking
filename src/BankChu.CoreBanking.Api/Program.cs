@@ -1,4 +1,4 @@
-using BankChu.CoreBanking.Api.Endpoints.Accounts;
+using BankChu.CoreBanking.Api.Endpoints;
 using BankChu.CoreBanking.Api.Extensions;
 using BankChu.CoreBanking.IoC;
 
@@ -17,6 +17,8 @@ builder.Services.AddCoreBanking(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseGlobalExceptionHandler();
+
 app.ApplyMigrations();
 
 if (app.Environment.IsDevelopment())
@@ -27,6 +29,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapHealthChecks("/health");
 
-app.MapAccountsEndpoints();
+app.MapApiEndpoints();
 
 app.Run();

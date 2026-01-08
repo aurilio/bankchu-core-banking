@@ -21,7 +21,11 @@ services:
         TrustServerCertificate=True;
 
       # Redis
-      Redis__ConnectionString: redis:6379
+      ConnectionStrings__Redis: redis:6379
+      
+      # BrasilAPI
+      ExternalApis__BrasilApi__BaseUrl: https://brasilapi.com.br
+      ExternalApis__BrasilApi__TimeoutSeconds: 60
     depends_on:
       - db
       - redis

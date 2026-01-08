@@ -9,5 +9,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/BankChu.CoreBanking.Application.Tests/BankChu.CoreBanking.Application.Tests.csproj" Id="b56f1afd-d3d1-469c-83f7-b70c3748eef1" />
     <Project Path="tests/BankChu.CoreBanking.Domain.Tests/BankChu.CoreBanking.Domain.Tests.csproj" Id="b287032c-2278-4a70-9f16-4098f09b4356" />
+    <Project Path="tests/BankChu.CoreBanking.Infrastructure.Tests/BankChu.CoreBanking.Infrastructure.Tests.csproj" Id="0ffde7c8-b4a9-46c4-8591-6dd219cb1ff5" />
   </Folder>
 </Solution>
