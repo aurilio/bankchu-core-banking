@@ -22,9 +22,7 @@ public sealed class CreateAccountService
         this.validator = validator;
     }
 
-    public async Task<Result<CreateAccountResult>> ExecuteAsync(
-        CreateAccountCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<CreateAccountResult>> ExecuteAsync(CreateAccountCommand command, CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
@@ -33,9 +31,7 @@ public sealed class CreateAccountService
             return Result<CreateAccountResult>.Failure(AccountErrors.InvalidData);
         }
 
-        var accountAlreadyExists = await accountRepository.ExistsByDocumentAsync(
-                                            command.Document,
-                                            cancellationToken);
+        var accountAlreadyExists = await accountRepository.ExistsByDocumentAsync(command.Document, cancellationToken);
 
         if (accountAlreadyExists)
         {

@@ -3,6 +3,7 @@ using BankChu.CoreBanking.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Distributed;
 using NSubstitute;
+using System.Text;
 using System.Text.Json;
 
 namespace BankChu.CoreBanking.Infrastructure.Tests.Services;
@@ -35,12 +36,12 @@ public sealed class BusinessDayServiceTests
     [Fact]
     public async Task IsBusinessDayAsync_Should_Return_False_When_Is_Holiday()
     {
-        var date = new DateOnly(2025, 1, 1); // exemplo
+        var date = new DateOnly(2025, 1, 1);
         var cacheKey = "holidays:2025";
 
-        // Cache vazio -> vai bater na BrasilAPI
-        _cache.GetStringAsync(cacheKey, Arg.Any<CancellationToken>())
-            .Returns((string?)null);
+        // Cache vazio
+        _cache.GetAsync(cacheKey, Arg.Any<CancellationToken>())
+            .Returns((byte[]?)null);
 
         _brasilApiClient.GetHolidaysAsync(2025, Arg.Any<CancellationToken>())
             .Returns(new List<BrasilApiHolidayResponse>
@@ -61,15 +62,19 @@ public sealed class BusinessDayServiceTests
         var date = new DateOnly(2025, 1, 2);
         var cacheKey = "holidays:2025";
 
-        var cached = JsonSerializer.Serialize(new List<string> { "2025-01-01" });
+        var cachedDates = new List<string> { "2025-01-01" };
+        var json = JsonSerializer.Serialize(cachedDates);
+        var bytes = Encoding.UTF8.GetBytes(json);
 
-        _cache.GetStringAsync(cacheKey, Arg.Any<CancellationToken>())
-            .Returns(cached);
+        _cache.GetAsync(cacheKey, Arg.Any<CancellationToken>())
+            .Returns(bytes);
 
         var result = await _service.IsBusinessDayAsync(date, CancellationToken.None);
 
         result.Should().BeTrue();
 
-        await _brasilApiClient.DidNotReceive().GetHolidaysAsync(Arg.Any<int>(), Arg.Any<CancellationToken>());
+        await _brasilApiClient
+            .DidNotReceive()
+            .GetHolidaysAsync(Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 }

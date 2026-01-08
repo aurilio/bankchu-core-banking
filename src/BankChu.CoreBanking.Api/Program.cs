@@ -1,4 +1,5 @@
 using BankChu.CoreBanking.Api.Endpoints;
+using BankChu.CoreBanking.Api.Endpoints.Accounts;
 using BankChu.CoreBanking.Api.Extensions;
 using BankChu.CoreBanking.IoC;
 
@@ -14,6 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddCoreBanking(builder.Configuration);
+builder.Services.AddScoped<StatementQueryHandler>();
 
 var app = builder.Build();
 

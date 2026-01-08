@@ -22,4 +22,9 @@ public static class AccountErrors
             Message: "Request payload is invalid.",
             Type: ErrorType.BadRequest); // 400
 
+    public static Error NotFound(Guid accountId) =>
+        new(
+            Code: "ACCOUNT_NOT_FOUND",
+            Message: $"Account with id '{accountId}' was not found.",
+            Type: ErrorType.NotFound); // 404
 }
