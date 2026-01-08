@@ -1,10 +1,12 @@
 ﻿using BankChu.CoreBanking.Application.Abstractions.Persistence;
 using BankChu.CoreBanking.Application.Abstractions.Services;
 using BankChu.CoreBanking.Application.Accounts.Create;
+using BankChu.CoreBanking.Application.Statements;
 using BankChu.CoreBanking.Application.Transfers;
 using BankChu.CoreBanking.Infrastructure.External;
 using BankChu.CoreBanking.Infrastructure.Persistence;
 using BankChu.CoreBanking.Infrastructure.Persistence.Repositories;
+using BankChu.CoreBanking.Infrastructure.Repositories;
 using BankChu.CoreBanking.Infrastructure.Services;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +98,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
+        services.AddScoped<IStatementRepository, StatementRepository>();
     }
 
     private static void AddUnitOfWork(IServiceCollection services)
@@ -107,6 +110,8 @@ public static class DependencyInjection
     {
         services.AddScoped<CreateAccountService>();
         services.AddScoped<TransferFundsService>();
+        services.AddScoped<GetStatementService>();
+
         services.AddScoped<IBusinessDayService, BusinessDayService>();
         services.AddScoped<IIdempotencyService, RedisIdempotencyService>();
     }

@@ -9,6 +9,7 @@ public static class EndpointsExtensions
     {
         endpoints.MapAccountsEndpoints();
         endpoints.MapTransfersEndpoints();
+        endpoints.MapGetStatement();
 
         return endpoints;
     }
