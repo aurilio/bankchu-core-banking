@@ -6,27 +6,27 @@ namespace BankChu.CoreBanking.Infrastructure.Persistence.Repositories;
 
 public sealed class AccountRepository : IAccountRepository
 {
-    private readonly CoreBankingDbContext dbContext;
+    private readonly CoreBankingDbContext _dbContext;
 
     public AccountRepository(CoreBankingDbContext dbContext)
     {
-        this.dbContext = dbContext;
+        this._dbContext = dbContext;
     }
 
-    public async Task<bool> ExistsByDocumentAsync(
-        string document,
-        CancellationToken cancellationToken)
+    public async Task<Account?> GetByIdAsync(Guid accountId, CancellationToken cancellationToken)
     {
-        return await dbContext.Accounts
-            .AnyAsync(
-                account => account.Document == document,
-                cancellationToken);
+        return await _dbContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(account => account.Id == accountId, cancellationToken);
     }
 
-    public async Task AddAsync(
-        Account account,
-        CancellationToken cancellationToken)
+    public async Task<bool> ExistsByDocumentAsync(string document, CancellationToken cancellationToken)
     {
-        await dbContext.Accounts.AddAsync(account, cancellationToken);
+        return await _dbContext.Accounts.AnyAsync(account => account.Document == document, cancellationToken);
+    }
+
+    public async Task AddAsync(Account account, CancellationToken cancellationToken)
+    {
+        await _dbContext.Accounts.AddAsync(account, cancellationToken);
     }
 }
