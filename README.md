@@ -68,9 +68,9 @@ A API utiliza JWT Bearer Authentication com controle de acesso por scopes.
 
 Como se autenticar
 
-Gere um token JWT com um dos dois perfís abaixo.
-client: Não tem permissão de criar conta
-admin: Pode fazer qualquer coisa
+Gere um token JWT com um dos dois perfís abaixo. <br>
+client: Não tem permissão de criar conta <br>
+admin: Pode fazer qualquer coisa.
 ```
 curl -X POST http://localhost:8080/api/v1/auth/token \
   -H "Content-Type: application/json" \
