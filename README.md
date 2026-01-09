@@ -1,4 +1,4 @@
-﻿﻿# BankChu.CoreBanking
+﻿﻿﻿# BankChu.CoreBanking
 
 API de **Core Banking** para gerenciamento de **contas**, **transferências** e **extrato bancário**, do Banco Chu S.A.
 
@@ -38,11 +38,23 @@ src/
 ```
 ---
 
-## Como executar o projeto
+## 🐳 Como executar o projeto via Docker (pre-built image no Docker Hub)
 
-### Executar com Docker
+### Steps
+
+**Clonar o repositorio:**
+
 ```bash
-docker compose up -d
+git clone https://github.com/aurilio/sales-api.git
+```
+**Acessar o diretório**
+```
+cd bankchu-core-banking/docker
+```
+
+**Executar o comando**
+```bash
+docker compose up -d --build
 ```
 
 A API estará disponível em:
@@ -132,25 +144,3 @@ curl -X GET "http://localhost:8080/api/v1/accounts/GUID_AQUI/statements?from=202
   -H "If-None-Match: \"ETAG_AQUI\"" \
   -i
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
