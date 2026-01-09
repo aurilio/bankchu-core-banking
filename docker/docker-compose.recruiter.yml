@@ -1,0 +1,71 @@
+services:
+  api:
+    image: auriliomendes/bankchu-corebanking:latest
+    container_name: bankchu-core-banking-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+
+      # SQL Server
+      ConnectionStrings__DefaultConnection: >
+        Server=db;
+        Database=BankChuCoreBanking;
+        User Id=sa;
+        Password=BancoChu@1;
+        TrustServerCertificate=True;
+
+      # Redis
+      ConnectionStrings__Redis: redis:6379
+
+      # Observability
+      Serilog__WriteTo__1__Name: Seq
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:5341
+
+      # BrasilAPI
+      ExternalApis__BrasilApi__BaseUrl: https://brasilapi.com.br
+      ExternalApis__BrasilApi__TimeoutSeconds: 60
+
+    depends_on:
+      - db
+      - redis
+      - seq
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bankchu-sqlserver
+    environment:
+      SA_PASSWORD: "BancoChu@1"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "sqlcmd -S localhost -U sa -P BancoChu@1 -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: bankchu-redis
+    ports:
+      - "6379:6379"
+
+  seq:
+    image: datalust/seq:latest
+    container_name: bankchu-seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+volumes:
+  sqlserver_data:
+  seq_data:
