@@ -4,6 +4,7 @@ using BankChu.CoreBanking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankChu.CoreBanking.Infrastructure.Migrations
 {
     [DbContext(typeof(CoreBankingDbContext))]
-    partial class CoreBankingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108230030_AddInitialBalanceToAccounts")]
+    partial class AddInitialBalanceToAccounts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

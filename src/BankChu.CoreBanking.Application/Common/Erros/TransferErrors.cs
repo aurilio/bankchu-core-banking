@@ -6,55 +6,67 @@ public static class TransferErrors
 {
     public static readonly Error InvalidAmount =
         new(
-            Code: "TRANSFER_INVALID_AMOUNT",
-            Message: "Transfer amount must be greater than zero.",
-            Type: ErrorType.BadRequest);
+            code: "TRANSFER_INVALID_AMOUNT",
+            message: "Transfer amount must be greater than zero.",
+            type: ErrorType.BadRequest);
 
     public static readonly Error SameAccount =
         new(
-            Code: "TRANSFER_SAME_ACCOUNT",
-            Message: "Source and destination accounts must be different.",
-            Type: ErrorType.BadRequest);
+            code: "TRANSFER_SAME_ACCOUNT",
+            message: "Source and destination accounts must be different.",
+            type: ErrorType.BadRequest);
 
     public static readonly Error NotBusinessDay =
         new(
-            Code: "TRANSFER_NOT_BUSINESS_DAY",
-            Message: "Transfers are allowed only on business days.",
-            Type: ErrorType.BusinessValidation);
+            code: "TRANSFER_NOT_BUSINESS_DAY",
+            message: "Transfers are allowed only on business days.",
+            type: ErrorType.BusinessValidation);
 
     public static readonly Error SourceAccountNotFound =
         new (
-            Code: "TRANSFER_SOURCE_NOT_FOUND",
-            Message: "Source account was not found.",
-            Type: ErrorType.NotFound);
+            code: "TRANSFER_SOURCE_NOT_FOUND",
+            message: "Source account was not found.",
+            type: ErrorType.NotFound);
 
     public static readonly Error DestinationAccountNotFound =
         new(
-            Code: "TRANSFER_DESTINATION_NOT_FOUND",
-            Message: "Destination account was not found.",
-            Type: ErrorType.NotFound);
+            code: "TRANSFER_DESTINATION_NOT_FOUND",
+            message: "Destination account was not found.",
+            type: ErrorType.NotFound);
 
     public static readonly Error SourceAccountInactive =
         new(
-            Code: "TRANSFER_SOURCE_INACTIVE",
-            Message: "Source account is inactive.",
-            Type: ErrorType.BusinessValidation);
+            code: "TRANSFER_SOURCE_INACTIVE",
+            message: "Source account is inactive.",
+            type: ErrorType.BusinessValidation);
    
     public static readonly Error DestinationAccountInactive =
         new (
-            Code: "TRANSFER_DESTINATION_INACTIVE",
-            Message: "Destination account is inactive.",
-            Type: ErrorType.BusinessValidation);
+            code: "TRANSFER_DESTINATION_INACTIVE",
+            message: "Destination account is inactive.",
+            type: ErrorType.BusinessValidation);
 
     public static readonly Error InsufficientBalance =
         new(
-            Code: "TRANSFER_INSUFFICIENT_BALANCE",
-            Message: "Source account has insufficient balance.",
-            Type: ErrorType.BusinessValidation);
+            code: "TRANSFER_INSUFFICIENT_BALANCE",
+            message: "Source account has insufficient balance.",
+            type: ErrorType.BusinessValidation);
 
     public static readonly Error DuplicateRequestInProgress =
         new(
-            Code: "TRANSFER_IDEMPOTENCY_IN_PROGRESS",
-            Message: "Another request with the same idempotency key is being processed.",
-            Type: ErrorType.Conflict);
+            code: "TRANSFER_IDEMPOTENCY_IN_PROGRESS",
+            message: "Another request with the same idempotency key is being processed.",
+            type: ErrorType.Conflict);
+
+    public static readonly Error InvalidData =
+        new(
+            code: "TRANSFER_INVALID_DATA",
+            message: "Transfer request contains invalid data.",
+            type: ErrorType.BadRequest);
+
+    public static readonly Error ValidationFailed =
+        new(
+            code: "TRANSFER_VALIDATION_FAILED",
+            message: "Transfer request validation failed.",
+            type: ErrorType.BadRequest);
 }

@@ -1,10 +1,12 @@
 ﻿using BankChu.CoreBanking.Application.Abstractions.Persistence;
 using BankChu.CoreBanking.Application.Accounts.Create;
 using BankChu.CoreBanking.Application.Common.Results;
+using BankChu.CoreBanking.Application.Statements;
 using BankChu.CoreBanking.Domain.Entities;
 using Bogus;
 using FluentAssertions;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace BankChu.CoreBanking.Application.Tests.Accounts.Create;
@@ -14,6 +16,7 @@ public sealed class CreateAccountServiceTests
     private readonly IAccountRepository _accountRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CreateAccountCommand> _validator;
+    private readonly ILogger<CreateAccountService> _logger;
     private readonly CreateAccountService _service;
     private readonly Faker _faker;
 
@@ -22,14 +25,25 @@ public sealed class CreateAccountServiceTests
         _accountRepository = Substitute.For<IAccountRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _validator = Substitute.For<IValidator<CreateAccountCommand>>();
+        _logger = Substitute.For<ILogger<CreateAccountService>>();
 
         _service = new CreateAccountService(
             _accountRepository,
             _unitOfWork,
-            _validator);
+            _validator,
+            _logger);
 
         _faker = new Faker();
 
+        _unitOfWork
+            .ExecuteAsync(
+                Arg.Any<Func<CancellationToken, Task>>(),
+                Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                var action = call.Arg<Func<CancellationToken, Task>>();
+                return action(CancellationToken.None);
+            });
         _validator
             .ValidateAsync(
                 Arg.Any<CreateAccountCommand>(),
@@ -49,17 +63,13 @@ public sealed class CreateAccountServiceTests
             .Returns(true);
 
         // Act
-        var result = await _service.ExecuteAsync(
-            command,
-            CancellationToken.None);
+        var result = await _service.ExecuteAsync(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error!.Type.Should().Be(ErrorType.Conflict);
         result.Error.Code.Should().Be("ACCOUNT_ALREADY_EXISTS");
-
-        await _unitOfWork.DidNotReceive().BeginTransactionAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -73,9 +83,7 @@ public sealed class CreateAccountServiceTests
             .Returns(false);
 
         // Act
-        var result = await _service.ExecuteAsync(
-            command,
-            CancellationToken.None);
+        var result = await _service.ExecuteAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -89,8 +97,6 @@ public sealed class CreateAccountServiceTests
         account.Balance.Should().Be(command.InitialBalance);
         account.IsActive.Should().BeTrue();
 
-        await _unitOfWork.Received(1).BeginTransactionAsync(Arg.Any<CancellationToken>());
-
         await _accountRepository.Received(1)
             .AddAsync(
                 Arg.Is<Account>(a =>
@@ -98,8 +104,6 @@ public sealed class CreateAccountServiceTests
                     a.Name == command.Name &&
                     a.Balance == command.InitialBalance),
                 Arg.Any<CancellationToken>());
-
-        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -117,17 +121,13 @@ public sealed class CreateAccountServiceTests
             .Returns(Task.FromException(new Exception("Database failure")));
 
         // Act
-        var act = async () =>
-            await _service.ExecuteAsync(command, CancellationToken.None);
+        var act = async () => await _service.ExecuteAsync(command, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
-
-        await _unitOfWork.Received(1).BeginTransactionAsync(Arg.Any<CancellationToken>());
-
-        await _unitOfWork.Received(1).RollbackAsync(Arg.Any<CancellationToken>());
-
-        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
+        
+        await _accountRepository.Received(1)
+                    .AddAsync(Arg.Any<Account>(), Arg.Any<CancellationToken>());
     }
 
     private CreateAccountCommand CreateValidCommand()

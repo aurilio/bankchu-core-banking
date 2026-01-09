@@ -15,19 +15,17 @@ public static class MigrationExtensions
             try
             {
                 using var scope = app.Services.CreateScope();
-                var dbContext = scope.ServiceProvider
-                    .GetRequiredService<CoreBankingDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<CoreBankingDbContext>();
 
                 dbContext.Database.Migrate();
-                break; // sucesso → sai do loop
+                break;
             }
             catch (Exception ex)
             {
                 if (retry == maxRetries - 1)
                     throw;
 
-                Console.WriteLine(
-                    $"Database not ready yet. Retry {retry + 1}/{maxRetries}. Error: {ex.Message}");
+                Console.WriteLine($"Database not ready yet. Retry {retry + 1}/{maxRetries}. Error: {ex.Message}");
 
                 Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
             }

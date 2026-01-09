@@ -16,12 +16,10 @@ public class CoreBankingDbContextFactory
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString =
-            configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' not found.");
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         var optionsBuilder = new DbContextOptionsBuilder<CoreBankingDbContext>();
         optionsBuilder.UseSqlServer(connectionString);

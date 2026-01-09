@@ -2,9 +2,11 @@
 
 public interface IUnitOfWork
 {
-    Task BeginTransactionAsync(CancellationToken cancellationToken);
+    Task ExecuteAsync(
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken);
 
-    Task CommitAsync(CancellationToken cancellationToken);
-
-    Task RollbackAsync(CancellationToken cancellationToken);
+    Task<T> ExecuteAsync<T>(
+        Func<CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken);
 }

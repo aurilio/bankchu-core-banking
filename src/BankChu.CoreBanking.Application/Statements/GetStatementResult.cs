@@ -6,5 +6,5 @@ public sealed record GetStatementResult(
     DateTime To,
     decimal OpeningBalance,
     decimal ClosingBalance,
-    IReadOnlyList<StatementItem> Items
+    IReadOnlyList<StatementLine> Items
 );

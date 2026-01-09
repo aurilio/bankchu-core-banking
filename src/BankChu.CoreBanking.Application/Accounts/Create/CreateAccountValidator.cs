@@ -2,8 +2,7 @@
 
 namespace BankChu.CoreBanking.Application.Accounts.Create;
 
-public sealed class CreateAccountValidator
-    : AbstractValidator<CreateAccountCommand>
+public sealed class CreateAccountValidator : AbstractValidator<CreateAccountCommand>
 {
     public CreateAccountValidator()
     {

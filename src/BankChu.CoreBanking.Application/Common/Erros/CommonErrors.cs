@@ -6,43 +6,43 @@ public static class CommonErrors
 {
     public static Error BadRequest(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.BadRequest);
+            code: code,
+            message: message,
+            type: ErrorType.BadRequest);
 
     public static Error Validation(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.BusinessValidation);
+            code: code,
+            message: message,
+            type: ErrorType.BusinessValidation);
 
     public static Error Conflict(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.Conflict);
+            code: code,
+            message: message,
+            type: ErrorType.Conflict);
 
     public static Error NotFound(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.NotFound);
+            code: code,
+            message: message,
+            type: ErrorType.NotFound);
 
     public static Error Unauthorized(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.Unauthorized);
+            code: code,
+            message: message,
+            type: ErrorType.Unauthorized);
 
     public static Error Forbidden(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.Forbidden);
+            code: code,
+            message: message,
+            type: ErrorType.Forbidden);
 
     public static Error Internal(string code, string message) =>
         new(
-            Code: code,
-            Message: message,
-            Type: ErrorType.Internal);
+            code: code,
+            message: message,
+            type: ErrorType.Internal);
 }

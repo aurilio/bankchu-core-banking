@@ -1,17 +1,12 @@
-﻿using BankChu.CoreBanking.Application.Statements.Dto;
+﻿using BankChu.CoreBanking.Application.Statements;
 
 namespace BankChu.CoreBanking.Application.Abstractions.Persistence;
 
 public interface IStatementRepository
 {
-    Task<IReadOnlyList<StatementItemDto>> GetAsync(
+    Task<IReadOnlyList<StatementItem>> GetAsync(
         Guid accountId,
         DateTime from,
         DateTime to,
-        CancellationToken cancellationToken);
-
-    Task<IReadOnlyList<StatementItemDto>> GetAfterAsync(
-        Guid accountId,
-        DateTime after,
         CancellationToken cancellationToken);
 }
