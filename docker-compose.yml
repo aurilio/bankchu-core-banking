@@ -23,12 +23,18 @@ services:
       # Redis
       ConnectionStrings__Redis: redis:6379
       
+      # Observability
+      Serilog__WriteTo__1__Name: Seq
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:5341
+
       # BrasilAPI
       ExternalApis__BrasilApi__BaseUrl: https://brasilapi.com.br
       ExternalApis__BrasilApi__TimeoutSeconds: 60
+    
     depends_on:
       - db
       - redis
+      - seq
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -51,6 +57,19 @@ services:
     container_name: bankchu-redis
     ports:
       - "6379:6379"
+  
+  seq:
+    image: datalust/seq:latest
+    container_name: bankchu-seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
 
 volumes:
   sqlserver_data:
+  seq_data:

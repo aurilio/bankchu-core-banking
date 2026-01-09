@@ -1,4 +1,4 @@
-﻿# BankChu.CoreBanking
+﻿﻿# BankChu.CoreBanking
 
 API de **Core Banking** para gerenciamento de **contas**, **transferências** e **extrato bancário**, do Banco Chu S.A.
 
@@ -86,8 +86,27 @@ curl -X POST http://localhost:8080/api/v1/accounts \
   }'
 ```
 
-Realizar transferência
+## Realizar transferência
 
+O endpoint de transferência (`POST /api/v1/transfers`) exige o header
+`Idempotency-Key`.
+
+Esse mecanismo garante que requisições repetidas (por retry de rede,
+timeout ou falha do cliente) **não gerem transferências duplicadas**,
+um requisito essencial em sistemas financeiros.
+
+### Como funciona
+
+- Requisições com o **mesmo Idempotency-Key** retornam sempre o mesmo resultado
+- Requisições com **chaves diferentes** criam novas transferências
+- A chave deve ser **única por tentativa de operação**
+
+### Exemplo
+
+```http
+Idempotency-Key: 8d7c4f5a-9a23-4a8b-9d22-acde12345678
+```
+Realizar transferência
 ```
 curl -X POST http://localhost:8080/api/v1/transfers \
   -H "Authorization: Bearer <TOKEN_AQUI>" \

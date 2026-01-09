@@ -11,12 +11,12 @@ public sealed record StatementItemResponse(
     Guid CounterpartyAccountId,
     decimal BalanceAfter)
 {
-    public static StatementItemResponse From(StatementItem item)
+    public static StatementItemResponse From(StatementLine line)
         => new(
-            item.TransferId,
-            item.OccurredAt,
-            item.Amount,
-            item.Type,
-            item.CounterpartyAccountId,
-            item.BalanceAfter);
+            line.TransferId,
+            line.OccurredAt,
+            line.Amount,
+            line.Type,
+            line.CounterpartyAccountId,
+            line.BalanceAfter);
 }

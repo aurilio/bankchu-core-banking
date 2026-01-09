@@ -8,6 +8,8 @@ public class Account
 
     public string Name { get; private set; } = null!;
 
+    public decimal InitialBalance { get; private set; }
+
     public decimal Balance { get; private set; }
 
     public bool IsActive { get; private set; }
@@ -24,6 +26,7 @@ public class Account
         Id = Guid.NewGuid();
         Document = document;
         Name = name;
+        InitialBalance = initialBalance;
         Balance = initialBalance;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;

@@ -3,6 +3,9 @@ using BankChu.CoreBanking.Application.Abstractions.Services;
 using BankChu.CoreBanking.Application.Common.Erros;
 using BankChu.CoreBanking.Application.Common.Results;
 using BankChu.CoreBanking.Domain.Entities;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace BankChu.CoreBanking.Application.Transfers;
 
@@ -16,52 +19,95 @@ public sealed class TransferFundsService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IBusinessDayService _businessDayService;
     private readonly IIdempotencyService _idempotencyService;
+    private readonly IValidator<TransferFundsCommand> _validator;
+    private readonly ILogger<TransferFundsService> _logger;
 
     public TransferFundsService(
         IAccountRepository accountRepository,
         ITransferRepository transferRepository,
         IUnitOfWork unitOfWork,
         IBusinessDayService businessDayService,
-        IIdempotencyService idempotencyService)
+        IIdempotencyService idempotencyService,
+        IValidator<TransferFundsCommand> validator,
+        ILogger<TransferFundsService> logger)
     {
         _accountRepository = accountRepository;
         _transferRepository = transferRepository;
         _unitOfWork = unitOfWork;
         _businessDayService = businessDayService;
         _idempotencyService = idempotencyService;
+        _validator = validator;
+        _logger = logger;
     }
 
-    public async Task<Result<TransferFundsResult>> ExecuteAsync(
-        TransferFundsCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<TransferFundsResult>> ExecuteAsync(TransferFundsCommand command, CancellationToken cancellationToken)
     {
-        var acquired = await _idempotencyService.TryAcquireAsync(command.IdempotencyKey, IdempotencyInProgressTtl, cancellationToken);
+        _logger.LogInformation(
+            "Starting transfer execution. FromAccount={FromAccountId}, ToAccount={ToAccountId}, Amount={Amount}, IdempotencyKey={IdempotencyKey}",
+            command.FromAccountId,
+            command.ToAccountId,
+            command.Amount,
+            command.IdempotencyKey);
+
+        var validation = await _validator.ValidateAsync(command, cancellationToken);
+
+        if (!validation.IsValid)
+        {
+            var details = validation.Errors.Select(e => e.ErrorMessage).ToArray();
+
+            _logger.LogWarning("Transfer validation failed. Errors={Errors}", details);
+
+            return Result<TransferFundsResult>.Failure(TransferErrors.ValidationFailed.WithDetails(details));
+        }
+
+        var acquired = await _idempotencyService.TryAcquireAsync(
+                                                    command.IdempotencyKey,
+                                                    IdempotencyInProgressTtl,
+                                                    cancellationToken);
 
         if (!acquired)
-            return Result<TransferFundsResult>.Failure(TransferErrors.DuplicateRequestInProgress);
+        {
+            _logger.LogWarning("Duplicate transfer request detected. IdempotencyKey={IdempotencyKey}", command.IdempotencyKey);
 
-        Result<TransferFundsResult> result;
+            return Result<TransferFundsResult>.Failure(TransferErrors.DuplicateRequestInProgress);
+        }
 
         try
         {
-            result = await ExecuteCoreAsync(command, cancellationToken);
+            var result = await ExecuteCoreAsync(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                await _idempotencyService.MarkCompletedAsync(
+                                            command.IdempotencyKey,
+                                            IdempotencyCompletedTtl,
+                                            cancellationToken);
+
+                _logger.LogInformation(
+                    "Transfer completed successfully. TransferId={TransferId}, FromAccount={FromAccountId}, ToAccount={ToAccountId}, Amount={Amount}",
+                    result.Value!.TransferId,
+                    result.Value.FromAccountId,
+                    result.Value.ToAccountId,
+                    result.Value.Amount);
+            }
+
+            return result;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(
+                ex,
+                "Unexpected error while processing transfer. FromAccount={FromAccountId}, ToAccount={ToAccountId}, Amount={Amount}, IdempotencyKey={IdempotencyKey}",
+                command.FromAccountId,
+                command.ToAccountId,
+                command.Amount,
+                command.IdempotencyKey);
+
             throw;
         }
-
-        if (result.IsSuccess)
-        {
-            await _idempotencyService.MarkCompletedAsync(command.IdempotencyKey, IdempotencyCompletedTtl, cancellationToken);
-        }
-
-        return result;
     }
 
-    private async Task<Result<TransferFundsResult>> ExecuteCoreAsync(
-        TransferFundsCommand command,
-        CancellationToken cancellationToken)
+    private async Task<Result<TransferFundsResult>> ExecuteCoreAsync(TransferFundsCommand command, CancellationToken cancellationToken)
     {
         if (command.Amount <= 0)
             return Result<TransferFundsResult>.Failure(TransferErrors.InvalidAmount);
@@ -69,17 +115,20 @@ public sealed class TransferFundsService
         if (command.FromAccountId == command.ToAccountId)
             return Result<TransferFundsResult>.Failure(TransferErrors.SameAccount);
 
-        var isBusinessDay = await _businessDayService.IsBusinessDayAsync(command.RequestedDate, cancellationToken);
+        var isBusinessDay = await _businessDayService
+            .IsBusinessDayAsync(command.RequestedDate, cancellationToken);
 
         if (!isBusinessDay)
             return Result<TransferFundsResult>.Failure(TransferErrors.NotBusinessDay);
 
-        var fromAccount = await _accountRepository.GetByIdAsync(command.FromAccountId, cancellationToken);
+        var fromAccount = await _accountRepository
+            .GetByIdAsync(command.FromAccountId, cancellationToken);
 
         if (fromAccount is null)
             return Result<TransferFundsResult>.Failure(TransferErrors.SourceAccountNotFound);
 
-        var toAccount = await _accountRepository.GetByIdAsync(command.ToAccountId, cancellationToken);
+        var toAccount = await _accountRepository
+            .GetByIdAsync(command.ToAccountId, cancellationToken);
 
         if (toAccount is null)
             return Result<TransferFundsResult>.Failure(TransferErrors.DestinationAccountNotFound);
@@ -93,9 +142,13 @@ public sealed class TransferFundsService
         if (fromAccount.Balance < command.Amount)
             return Result<TransferFundsResult>.Failure(TransferErrors.InsufficientBalance);
 
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        _logger.LogDebug(
+            "Executing transfer transaction. FromAccount={FromAccountId}, ToAccount={ToAccountId}, Amount={Amount}",
+            command.FromAccountId,
+            command.ToAccountId,
+            command.Amount);
 
-        try
+        var transfer = await _unitOfWork.ExecuteAsync(async ct =>
         {
             fromAccount.Debit(command.Amount);
             toAccount.Credit(command.Amount);
@@ -105,23 +158,18 @@ public sealed class TransferFundsService
                 command.ToAccountId,
                 command.Amount);
 
-            await _transferRepository.AddAsync(transfer, cancellationToken);
+            await _transferRepository.AddAsync(transfer, ct);
 
-            await _unitOfWork.CommitAsync(cancellationToken);
+            return transfer;
+        }, cancellationToken);
 
-            return Result<TransferFundsResult>.Success(
-                new TransferFundsResult(
-                    transfer.Id,
-                    transfer.FromAccountId,
-                    transfer.ToAccountId,
-                    transfer.Amount,
-                    transfer.CreatedAt,
-                    transfer.Status));
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync(cancellationToken);
-            throw;
-        }
+        return Result<TransferFundsResult>.Success(
+            new TransferFundsResult(
+                transfer.Id,
+                transfer.FromAccountId,
+                transfer.ToAccountId,
+                transfer.Amount,
+                transfer.CreatedAt,
+                transfer.Status));
     }
 }

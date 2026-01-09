@@ -6,25 +6,25 @@ public static class AccountErrors
 {
     public static readonly Error AlreadyExists =
         new(
-            Code: "ACCOUNT_ALREADY_EXISTS",
-            Message: "An account with this document already exists.",
-            Type: ErrorType.Conflict); // 409
+            code: "ACCOUNT_ALREADY_EXISTS",
+            message: "An account with this document already exists.",
+            type: ErrorType.Conflict); // 409
 
     public static readonly Error InvalidData =
         new(
-            Code: "ACCOUNT_INVALID_DATA",
-            Message: "Account data is invalid.",
-            Type: ErrorType.BusinessValidation); // 422
+            code: "ACCOUNT_INVALID_DATA",
+            message: "Account data is invalid.",
+            type: ErrorType.BusinessValidation); // 422
 
     public static readonly Error MalformedRequest =
         new(
-            Code: "ACCOUNT_BAD_REQUEST",
-            Message: "Request payload is invalid.",
-            Type: ErrorType.BadRequest); // 400
+            code: "ACCOUNT_BAD_REQUEST",
+            message: "Request payload is invalid.",
+            type: ErrorType.BadRequest); // 400
 
     public static Error NotFound(Guid accountId) =>
         new(
-            Code: "ACCOUNT_NOT_FOUND",
-            Message: $"Account with id '{accountId}' was not found.",
-            Type: ErrorType.NotFound); // 404
+            code: "ACCOUNT_NOT_FOUND",
+            message: $"Account with id '{accountId}' was not found.",
+            type: ErrorType.NotFound); // 404
 }

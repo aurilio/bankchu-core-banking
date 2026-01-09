@@ -19,7 +19,12 @@ public class CoreBankingDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Document).IsRequired();
             entity.HasIndex(x => x.Document).IsUnique();
-            entity.Property(x => x.Balance).HasPrecision(18, 2);
+            entity.Property(x => x.InitialBalance)
+                  .HasPrecision(18, 2)
+                  .IsRequired();
+            entity.Property(x => x.Balance)
+                  .HasPrecision(18, 2)
+                  .IsRequired();
         });
 
         modelBuilder.Entity<Transfer>(entity =>

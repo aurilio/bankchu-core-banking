@@ -42,17 +42,13 @@ public sealed class BusinessDayService : IBusinessDayService
             var cachedDates = JsonSerializer.Deserialize<List<string>>(cachedJson);
             if (cachedDates is not null)
             {
-                return cachedDates
-                    .Select(DateOnly.Parse)
-                    .ToHashSet();
+                return cachedDates.Select(DateOnly.Parse).ToHashSet();
             }
         }
 
         var apiHolidays = await _brasilApiClient.GetHolidaysAsync(year, cancellationToken);
 
-        var holidayDates = apiHolidays
-                                .Select(h => DateOnly.Parse(h.Date))
-                                .ToHashSet();
+        var holidayDates = apiHolidays.Select(h => DateOnly.Parse(h.Date)).ToHashSet();
 
         var jsonToCache = JsonSerializer.Serialize(holidayDates.Select(d => d.ToString("yyyy-MM-dd")).ToList());
 

@@ -29,9 +29,7 @@ public static class TransfersEndpoints
         TransferFundsService service,
         CancellationToken cancellationToken)
     {
-        if (!httpContext.Request.Headers.TryGetValue(
-                IdempotencyHeaderName,
-                out var idempotencyKeyValues))
+        if (!httpContext.Request.Headers.TryGetValue(IdempotencyHeaderName, out var idempotencyKeyValues))
         {
             return CommonErrors
                 .BadRequest(

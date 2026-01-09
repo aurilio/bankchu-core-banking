@@ -3,38 +3,50 @@ using BankChu.CoreBanking.Application.Common.Errors;
 using BankChu.CoreBanking.Application.Common.Results;
 using BankChu.CoreBanking.Domain.Entities;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace BankChu.CoreBanking.Application.Accounts.Create;
 
 public sealed class CreateAccountService
 {
-    private readonly IAccountRepository accountRepository;
-    private readonly IUnitOfWork unitOfWork;
-    private readonly IValidator<CreateAccountCommand> validator;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IValidator<CreateAccountCommand> _validator;
+    private readonly ILogger<CreateAccountService> _logger;
 
     public CreateAccountService(
         IAccountRepository accountRepository,
         IUnitOfWork unitOfWork,
-        IValidator<CreateAccountCommand> validator)
+        IValidator<CreateAccountCommand> validator,
+        ILogger<CreateAccountService> logger)
     {
-        this.accountRepository = accountRepository;
-        this.unitOfWork = unitOfWork;
-        this.validator = validator;
+        _accountRepository = accountRepository;
+        _unitOfWork = unitOfWork;
+        _validator = validator;
+        _logger = logger;
     }
 
     public async Task<Result<CreateAccountResult>> ExecuteAsync(CreateAccountCommand command, CancellationToken cancellationToken)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        _logger.LogInformation(
+            "Starting account creation. DocumentHash={DocumentHash}, InitialBalance={InitialBalance}",
+            command.Document.GetHashCode(),
+            command.InitialBalance);
+
+        var validationResult = await _validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
         {
             return Result<CreateAccountResult>.Failure(AccountErrors.InvalidData);
         }
 
-        var accountAlreadyExists = await accountRepository.ExistsByDocumentAsync(command.Document, cancellationToken);
+        var accountAlreadyExists = await _accountRepository.ExistsByDocumentAsync(command.Document, cancellationToken);
 
         if (accountAlreadyExists)
         {
+            _logger.LogWarning("Account creation failed. Account already exists. DocumentHash={DocumentHash}", command.Document.GetHashCode());
+
             return Result<CreateAccountResult>.Failure(AccountErrors.AlreadyExists);
         }
 
@@ -43,18 +55,15 @@ public sealed class CreateAccountService
             command.Name,
             command.InitialBalance);
 
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        await _unitOfWork.ExecuteAsync(async ct =>
+        {
+            await _accountRepository.AddAsync(account, ct);
+        }, cancellationToken);
 
-        try
-        {
-            await accountRepository.AddAsync(account, cancellationToken);
-            await unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await unitOfWork.RollbackAsync(cancellationToken);
-            throw;
-        }
+        _logger.LogInformation(
+            "Account created successfully. AccountId={AccountId}, InitialBalance={InitialBalance}",
+            account.Id,
+            account.InitialBalance);
 
         var result = new CreateAccountResult(
             account.Id,
