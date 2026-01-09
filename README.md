@@ -45,7 +45,7 @@ src/
 **Clonar o repositorio:**
 
 ```bash
-git clone https://github.com/aurilio/sales-api.git
+git clone https://github.com/aurilio/bankchu-core-banking.git
 ```
 **Acessar o diretório**
 ```
